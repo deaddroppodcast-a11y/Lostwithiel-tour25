@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#059669">
+    <title>Lostwithiel Walking Tour</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #ecfdf5 0%, #dbeafe 100%);
+            min-height: 100vh;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, #059669 0%, #0369a1 100%);
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            max-width: 480px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .app-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+        
+        .tour-stats {
+            display: flex;
+            justify-content: space-around;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .progress-bar {
+            background: rgba(255,255,255,0.2);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: white;
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        .main-content {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .stop-card {
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border-left: 4px solid #3b82f6;
+            transition: all 0.3s ease;
+        }
+        
+        .stop-card.visited {
+            border-left-color: #059669;
+            background: #f0fdf4;
+        }
+        
+        .card-content {
+            padding: 1.5rem;
+        }
+        
+        .stop-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .stop-number {
+            min-width: 36px;
+            height: 36px;
+            border-radius: 18px;
+            background: #3b82f6;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .stop-card.visited .stop-number {
+            background: #059669;
+        }
+        
+        .stop-title {
+            flex: 1;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stop-description {
+            color: #6b7280;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 1rem;
+        }
+        
+        .stop-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: #9ca3af;
+            margin-bottom: 1rem;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            min-height: 44px;
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-info {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        
+        .btn-visit {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .btn-navigate {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .details-panel {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            display: none;
+        }
+        
+        .details-section {
+            margin-bottom: 1rem;
+        }
+        
+        .details-title {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .details-text {
+            color: #6b7280;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        
+        .completion-card {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border: 2px solid #059669;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+            display: none;
+        }
+        
+        .completion-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #065f46;
+            margin-bottom: 0.5rem;
+        }
+        
+        .completion-text {
+            color: #047857;
+            font-size: 0.9rem;
+        }
+        
+        .footer {
+            background: #1f2937;
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .footer-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-text {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 0.5rem;
+            }
+            
+            .card-content {
+                padding: 1rem;
+            }
+            
+            .app-title {
+                font-size: 1.25rem;
+            }
+            
+            .stop-title {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">🏰 Lostwithiel Walking Tour</h1>
+                <p class="app-subtitle">Discover Cornwall's Ancient Capital</p>
+                <div class="tour-stats">
+                    <div>📍 14 stops</div>
+                    <div>⏱️ 3h 18m</div>
+                    <div>🚶‍♂️ Circular route</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div id="stops-container">
+                <!-- Stops will be loaded here -->
+            </div>
+
+            <div id="completion-card" class="completion-card">
+                <div style="font-size: 48px; margin-bottom: 1rem;">🎉</div>
+                <h3 class="completion-title">Tour Complete!</h3>
+                <p class="completion-text">
+                    Congratulations! You've explored all the historic highlights of Lostwithiel.
+                </p>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <h3 class="footer-title">About Lostwithiel</h3>
+            <p class="footer-text">
+                Once the capital of Cornwall and seat of the Duchy, Lostwithiel is a town steeped in medieval history.
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Simple working version
+        var visitedStops = new Set();
+        
+        var stops = [
+            {
+                id: 1,
+                name: "Lostwithiel Railway Station",
+                description: "Start your journey at this charming Victorian railway station, gateway to Cornwall's ancient capital.",
+                details: "Built in 1859, this station connected Lostwithiel to the world. The building retains much of its original Victorian character with ornate ironwork and period features.",
+                duration: 5,
+                lat: 50.4067,
+                lng: -4.6744,
+                tips: "Look for the original Victorian canopies and decorative ironwork.",
+                historical: "The railway brought prosperity to Lostwithiel in the 19th century."
+            },
+            {
+                id: 2,
+                name: "King's Arms Hotel",
+                description: "A historic coaching inn that has welcomed travelers for centuries.",
+                details: "This Grade II listed building has been providing hospitality since at least the 18th century.",
+                duration: 5,
+                lat: 50.4062,
+                lng: -4.6740,
+                tips: "Notice the traditional coaching inn architecture.",
+                historical: "Coaching inns like this were vital stops before the railway arrived."
+            },
+            {
+                id: 3,
+                name: "Fore Street & Town Centre",
+                description: "Walk through the heart of medieval Lostwithiel along the ancient main street.",
+                details: "Fore Street has been the main thoroughfare for over 700 years.",
+                duration: 10,
+                lat: 50.4058,
+                lng: -4.6738,
+                tips: "Notice the mix of medieval, Georgian, and Victorian architecture.",
+                historical: "This was once one of Cornwall's most important trading streets."
+            },
+            {
+                id: 4,
+                name: "Globe Inn",
+                description: "A traditional Cornish pub with centuries of history and character.",
+                details: "This historic public house has been serving the community for generations.",
+                duration: 10,
+                lat: 50.4057,
+                lng: -4.6737,
+                tips: "Perfect for a refreshment break.",
+                historical: "Traditional pubs were the social heart of medieval communities."
+            },
+            {
+                id: 5,
+                name: "Guildhall Museum",
+                description: "Visit Cornwall's oldest civic building, dating from the 14th century.",
+                details: "Built around 1450, this beautiful stone building served as the town hall and courthouse.",
+                duration: 20,
+                lat: 50.4056,
+                lng: -4.6736,
+                tips: "Check opening times before visiting.",
+                historical: "This is where the Stannary Court met to govern Cornwall's tin mining industry."
+            },
+            {
+                id: 6,
+                name: "Lostwithiel Museum",
+                description: "Discover local history and artifacts in this charming community museum.",
+                details: "Run by volunteers, this museum showcases Lostwithiel's fascinating past.",
+                duration: 25,
+                lat: 50.4055,
+                lng: -4.6735,
+                tips: "Check opening times as it's run by volunteers.",
+                historical: "The museum preserves over 2,000 years of local history."
+            },
+            {
+                id: 7,
+                name: "St. Bartholomew's Church",
+                description: "Explore this magnificent 14th-century parish church with its soaring spire.",
+                details: "One of Cornwall's finest churches, with a 123-foot spire visible for miles.",
+                duration: 15,
+                lat: 50.4054,
+                lng: -4.6731,
+                tips: "Don't miss the medieval carved stones.",
+                historical: "It was the spiritual heart of medieval Cornwall."
+            },
+            {
+                id: 8,
+                name: "Duchy of Cornwall Nursery",
+                description: "Visit the beautiful gardens and nursery of the Duchy of Cornwall.",
+                details: "This working nursery showcases sustainable horticultural practices.",
+                duration: 30,
+                lat: 50.4045,
+                lng: -4.6728,
+                tips: "Great for plant enthusiasts!",
+                historical: "The Duchy has been connected to Lostwithiel since medieval times."
+            },
+            {
+                id: 9,
+                name: "Restormel Castle",
+                description: "Climb to this perfectly preserved 13th-century circular castle.",
+                details: "One of Cornwall's finest castles, with spectacular views over the Fowey Valley.",
+                duration: 45,
+                lat: 50.4089,
+                lng: -4.6644,
+                tips: "Steep walk up, but worth it! Bring water and wear good shoes.",
+                historical: "Home to the Black Prince and administrative center of the Duchy."
+            },
+            {
+                id: 10,
+                name: "Fowey Valley Cider",
+                description: "Sample traditional Cornish cider at this local producer.",
+                details: "A family-run cider maker producing traditional Cornish ciders using local apples.",
+                duration: 20,
+                lat: 50.4075,
+                lng: -4.6650,
+                tips: "Check opening times for tastings.",
+                historical: "Cider making has been part of Cornwall's heritage for centuries."
+            },
+            {
+                id: 11,
+                name: "Duchy Palace Ruins",
+                description: "Discover the remains of the great palace of the Dukes of Cornwall.",
+                details: "Once a magnificent palace complex, now romantic ruins in a riverside setting.",
+                duration: 15,
+                lat: 50.4039,
+                lng: -4.6722,
+                tips: "Free to explore. Great spot for photos.",
+                historical: "This was where the Dukes of Cornwall held court."
+            },
+            {
+                id: 12,
+                name: "Tudor Bridge",
+                description: "Cross the historic Tudor bridge over the River Fowey.",
+                details: "This beautiful stone bridge dates from the Tudor period.",
+                duration: 8,
+                lat: 50.4040,
+                lng: -4.6720,
+                tips: "Perfect photo opportunity!",
+                historical: "Tudor bridges were engineering marvels of their time."
+            },
+            {
+                id: 13,
+                name: "River Fowey Riverside Walk",
+                description: "Follow the peaceful riverside path back towards the town center.",
+                details: "The River Fowey was Lostwithiel's lifeline, bringing trade and prosperity.",
+                duration: 15,
+                lat: 50.4041,
+                lng: -4.6719,
+                tips: "Look for wildlife along the riverbank.",
+                historical: "Medieval ships sailed up this tidal river from across Europe."
+            },
+            {
+                id: 14,
+                name: "Return to Railway Station",
+                description: "Complete your circular tour by returning to your starting point.",
+                details: "Your circular walking tour concludes where it began.",
+                duration: 10,
+                lat: 50.4067,
+                lng: -4.6744,
+                tips: "Take a moment to reflect on all the history you've discovered.",
+                historical: "You've walked in the footsteps of centuries of visitors."
+            }
+        ];
+
+        function renderStops() {
+            var container = document.getElementById('stops-container');
+            container.innerHTML = '';
+
+            for (var i = 0; i < stops.length; i++) {
+                var stop = stops[i];
+                var isVisited = visitedStops.has(stop.id);
+
+                var card = document.createElement('div');
+                card.className = 'stop-card' + (isVisited ? ' visited' : '');
+                
+                var visitedHtml = isVisited ? '<span style="color: #059669; font-size: 0.8rem;">✓ Visited</span>' : '';
+                var visitButtonHtml = !isVisited ? 
+                    '<button class="btn btn-visit" onclick="markVisited(' + stop.id + ')">✅ Mark as Visited</button>' : '';
+
+                card.innerHTML = 
+                    '<div class="card-content">' +
+                        '<div class="stop-header">' +
+                            '<div class="stop-number">' + (i + 1) + '</div>' +
+                            '<div style="flex: 1;">' +
+                                '<h3 class="stop-title">' + stop.name + '</h3>' +
+                                visitedHtml +
+                            '</div>' +
+                        '</div>' +
+                        '<p class="stop-description">' + stop.description + '</p>' +
+                        '<div class="stop-meta">' +
+                            '<div class="meta-item">⏱️ ' + stop.duration + ' mins</div>' +
+                            '<div class="meta-item">🧭 ' + stop.lat.toFixed(4) + '°N, ' + Math.abs(stop.lng).toFixed(4) + '°W</div>' +
+                        '</div>' +
+                        '<div class="action-buttons">' +
+                            '<button class="btn btn-info" onclick="toggleDetails(' + stop.id + ')">ℹ️ <span id="btn-' + stop.id + '">Show Details</span></button>' +
+                            visitButtonHtml +
+                            '<button class="btn btn-navigate" onclick="openMap(' + stop.lat + ',' + stop.lng + ')">🧭 Navigate</button>' +
+                        '</div>' +
+                        '<div id="details-' + stop.id + '" class="details-panel">' +
+                            '<div class="details-section">' +
+                                '<h4 class="details-title">About this Stop</h4>' +
+                                '<p class="details-text">' + stop.details + '</p>' +
+                            '</div>' +
+                            '<div class="details-section">' +
+                                '<h4 class="details-title">Visitor Tips</h4>' +
+                                '<p class="details-text">' + stop.tips + '</p>' +
+                            '</div>' +
+                            '<div class="details-section">' +
+                                '<h4 class="details-title">Historical Context</h4>' +
+                                '<p class="details-text">' + stop.historical + '</p>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>';
+                
+                container.appendChild(card);
+            }
+        }
+
+        function toggleDetails(stopId) {
+            var details = document.getElementById('details-' + stopId);
+            var button = document.getElementById('btn-' + stopId);
+            
+            if (details.style.display === 'none' || details.style.display === '') {
+                details.style.display = 'block';
+                button.textContent = 'Hide Details';
+            } else {
+                details.style.display = 'none';
+                button.textContent = 'Show Details';
+            }
+        }
+
+        function markVisited(stopId) {
+            visitedStops.add(stopId);
+            updateProgress();
+            renderStops();
+        }
+
+        function updateProgress() {
+            var progress = (visitedStops.size / stops.length) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            
+            if (visitedStops.size === stops.length) {
+                document.getElementById('completion-card').style.display = 'block';
+            }
+        }
+
+        function openMap(lat, lng) {
+            var url = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng + '&travelmode=walking';
+            window.open(url, '_blank');
+        }
+
+        // Initialize the app
+        renderStops();
+    </script>
+</body>
+</html>
+
